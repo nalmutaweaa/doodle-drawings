@@ -6,7 +6,7 @@ from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from sklearn.neighbors import NearestNeighbors
 
-
+THRESHOLD = 0.75
 # model load
 @st.cache_resource
 def load_model():
@@ -127,20 +127,27 @@ if st.button("Search"):
             distances, indices = neighbors.kneighbors(embedding)
             similarities = 1 - distances[0]
             
-            st.subheader("Top 25 Similar Drawings")
+           st.caption(f"Best match score: {similarities[0]:.2f}")  
 
-            for row in range(5):
-                cols = st.columns(5)
-                for col in range(5):
-                    i = row * 5 + col
-                    idx = indices[0][i]
+            if similarities[0] < THRESHOLD:
+                st.warning("Nothing similar found")
 
-                    with cols[col]:
-                        img = gallery_x[idx].reshape(28, 28)
+            else:
+                st.subheader("Top 25 Similar Drawings")
 
-                        st.image(
-                            img,
-                            caption=f"{similarities[i]:.2f}",
-                            width=100,
-                            clamp=True
-                        )
+                for row in range(5):
+                    cols = st.columns(5)
+                    for col in range(5):
+                        i = row * 5 + col
+                        idx = indices[0][i]
+
+                        with cols[col]:
+                            img = gallery_x[idx].reshape(28, 28)
+
+                            st.image(
+                                img,
+                                caption=f"{similarities[i]:.2f}",
+                                width=100,
+                                clamp=True
+                            )
+
