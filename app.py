@@ -1,6 +1,5 @@
 import streamlit as st
 import numpy as np
-
 from PIL import Image
 from streamlit_drawable_canvas import st_canvas
 from tensorflow.keras.applications import MobileNetV2
@@ -8,7 +7,7 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from sklearn.neighbors import NearestNeighbors
 
 
-# Load model
+# model load
 @st.cache_resource
 def load_model():
     return MobileNetV2(
@@ -18,15 +17,14 @@ def load_model():
     )
 
 
-# Load saved dataset
+# load dataset
 @st.cache_data
 def load_data():
     data = np.load("doodle_gallery.npz")
-
     return data["images"], data["embeddings"]
 
 
-# Preprocess drawing
+# process drawn art
 def preprocess_drawing(image):
 
     image = image.convert("RGBA")
@@ -47,21 +45,18 @@ def extract_embedding(doodle, model):
     image = Image.fromarray(doodle.astype("uint8"))
     image = image.resize((160, 160))
     image = image.convert("RGB")
-
     image = np.array(image, dtype="float32")
     image = preprocess_input(image)
-
     image = np.expand_dims(image, axis=0)
-
     return model.predict(image, verbose=0)
 
 
-# Load resources
+# load resources
 model = load_model()
 gallery_x, feature_list = load_data()
 
 
-# Search engine
+# search using neighbors
 @st.cache_resource
 def load_neighbors(_features):
 
@@ -69,24 +64,22 @@ def load_neighbors(_features):
         n_neighbors=25,
         metric="cosine"
     )
-
     neighbors.fit(_features)
-
     return neighbors
 
 
 neighbors = load_neighbors(feature_list)
 
 
-# App
-st.title("Doodle Search")
+# Steamlit App
+st.title("Doodle Drawing Search 🎨🖼️")
 
-st.write("Draw or upload an image to find similar doodles.")
+st.write("Draw or upload an image to find top 25 similar doodles!!")
 
 
-# Drawing canvas
+# canves
 canvas = st_canvas(
-    stroke_color="#FFFFFF",
+    stroke_color="#6C3BAA",
     background_color="#000000",
     stroke_width=8,
     height=280,
@@ -96,14 +89,14 @@ canvas = st_canvas(
     key="canvas"
 )
 
-# Upload image
+# upload 
 uploaded_file = st.file_uploader(
     "Or upload an image",
     type=["png", "jpg", "jpeg"]
 )
 
 
-# Search button
+# search button
 if st.button("Search"):
 
     if uploaded_file is not None:
@@ -130,24 +123,15 @@ if st.button("Search"):
             # Show processed image
             st.write("Your Drawing")
             st.image(drawing, width=150, clamp=True)
-
-            # Extract features
             embedding = extract_embedding(drawing, model)
-
-            # Search
             distances, indices = neighbors.kneighbors(embedding)
-
             similarities = 1 - distances[0]
-
-            # Display results
+            
             st.subheader("Top 25 Similar Drawings")
 
             for row in range(5):
-
                 cols = st.columns(5)
-
                 for col in range(5):
-
                     i = row * 5 + col
                     idx = indices[0][i]
 
