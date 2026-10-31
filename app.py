@@ -127,7 +127,7 @@ if st.button("Search"):
             distances, indices = neighbors.kneighbors(embedding)
             similarities = 1 - distances[0]
             
-           st.caption(f"Best match score: {similarities[0]:.2f}")  
+            st.caption(f"Best match score: {similarities[0]:.2f}")  
 
             if similarities[0] < THRESHOLD:
                 st.warning("Nothing similar found")
