@@ -92,9 +92,9 @@ canvas = st_canvas(
     height=280,
     width=280,
     drawing_mode="freedraw",
+    return_image_data=True,
     key="canvas"
 )
-
 
 # Upload image
 uploaded_file = st.file_uploader(
